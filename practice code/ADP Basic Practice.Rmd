@@ -1,0 +1,77 @@
+---
+title: "ADP Basic Prantice"
+output: html_document
+date: '2022-10-22'
+---
+
+```{r, include=FALSE, message=FALSE}
+#Required Packages
+library(tidyverse)
+library(GGally)
+```
+
+## 2. Data Transformation
+
+### 2.1. Derived Variable
+
+파생변수 생성.
+```{r}
+tb_iris <- as_tibble(iris)
+tb_iris %>%
+  mutate(Sum.Length = Sepal.Length + Petal.Length)
+tb_iris %>%
+  transmute(Sum.Length = Sepal.Length + Petal.Length) #remain only computed variable
+```
+
+### 2.2. Dimension Diminishing
+
+#### 2.2.1. Principal Component Analysis(PCA)
+
+주성분 분석에 관한 내용.
+
+##### 2.2.1.1. 상관분석
+```{r}
+#data
+head(USArrests)
+
+#correlation analysis
+pairs(USArrests, panel = panel.smooth, main = "USArrests") #print all scatter plot
+
+#other method(ggpairs)
+ggpairs(data = USArrests,
+        title = "Multiple scatter plot",
+        progress = FALSE)
+```
+
+##### 2.2.1.2. 주성분분석 수행
+```{r}
+US_pca <- princomp(USArrests, cor = TRUE)
+summary(US_pca) #results
+plot(US_pca, type = "l", main = "Scree Plot") #scree plot
+```
+
+누적기여율이 85%를 넘기는 주성분까지,
+또는 scree plot에서 기울기가 급격히 감소하는 주성분 전까지 선택.
+본 분석의 경우 Comp.2까지 선택하는 것이 바람직.
+
+##### 2.2.1.3. 주성분계수 확인
+```{r}
+US_pca$loadings
+```
+Comp.1의 경우 0.536 x Murder + 0.583 x Assault + ... 으로 구성되어 있음
+
+##### 2.2.1.4. 주성분점수 확인
+```{r}
+head(US_pca$scores)
+```
+주성분들의 선형식을 통해 새롭게 계산된 각 행의 값임
+
+##### 2.2.1.5. 행렬도(Biplot) 출력
+```{r}
+biplot(US_pca, scale = 0, cex = 0.5)
+```
+
+해석:
+1) Biplot 그림에서 화살표는 원변수와 PC의 상관계수를 뜻하며, PC와 평행할수록 해당 PC에 큰 영향.
+2) 화살표 벡터의 길이가 원변수의 분산을 표현하며, 길수록 분산이 큼.
+3) 화살표 사잇각이 좁을수록 상관관계가 큼을 의미
